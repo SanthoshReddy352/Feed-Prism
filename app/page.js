@@ -113,6 +113,59 @@ function selectLandingArticlesByCategory(articles, totalNeeded = 12) {
   return selected.slice(0, totalNeeded);
 }
 
+import { unstable_cache } from 'next/cache';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+
+// Create a public client for cached public data
+const getPublicClient = () => createSupabaseClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
+
+// Cache stats for 1 hour
+const getCachedStats = unstable_cache(
+  async (startOfDayIso, nowIso) => {
+    const supabase = getPublicClient();
+    const [sourceCount, articleCount, todayCount] = await Promise.all([
+      supabase
+        .from('sources')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true),
+      supabase
+        .from('articles')
+        .select('*', { count: 'exact', head: true }),
+      supabase
+        .from('articles')
+        .select('*', { count: 'exact', head: true })
+        .gte('published_at', startOfDayIso)
+        .lte('published_at', nowIso)
+    ]);
+
+    return {
+      sourceCount: sourceCount.count || 0,
+      articleCount: articleCount.count || 0,
+      todayCount: todayCount.count || 0,
+    };
+  },
+  ['site-stats'],
+  { revalidate: 3600 }
+);
+
+// Cache sources for 1 hour
+const getCachedSources = unstable_cache(
+  async () => {
+    const supabase = getPublicClient();
+    return supabase
+      .from('sources')
+      .select('name, category')
+      .eq('is_active', true)
+      .order('name')
+      .limit(200);
+  },
+  ['active-sources'],
+  { revalidate: 3600 }
+);
+
 export default async function Home() {
   const supabase = await createClient();
   const nowIso = new Date().toISOString();
@@ -120,60 +173,27 @@ export default async function Home() {
   startOfDay.setHours(0, 0, 0, 0);
   const startOfDayIso = startOfDay.toISOString();
 
-  const userResult = await safeQuery(
-    'user',
-    supabase.auth.getUser(),
-    { data: { user: null } }
-  );
-
-  const recentArticlesResult = await safeQuery(
-    'recent articles',
-    supabase
-      .from('articles')
-      .select('id, title, description, url, category, image_url, published_at, sources(name)')
-      .lte('published_at', nowIso)
-      .order('published_at', { ascending: false })
-      .limit(220),
-    { data: [], error: null }
-  );
-
-  const sourcesResult = await safeQuery(
-    'sources',
-    supabase
-      .from('sources')
-      .select('name, category')
-      .eq('is_active', true)
-      .order('name')
-      .limit(200),
-    { data: [], error: null }
-  );
-
-  const activeSourceCountResult = await safeQuery(
-    'source count',
-    supabase
-      .from('sources')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_active', true),
-    { count: 0 }
-  );
-
-  const articleCountResult = await safeQuery(
-    'article count',
-    supabase
-      .from('articles')
-      .select('*', { count: 'exact', head: true }),
-    { count: 0 }
-  );
-
-  const todayCountResult = await safeQuery(
-    'today article count',
-    supabase
-      .from('articles')
-      .select('*', { count: 'exact', head: true })
-      .gte('published_at', startOfDayIso)
-      .lte('published_at', nowIso),
-    { count: 0 }
-  );
+  // Fetch all data in parallel
+  const [
+    userResult,
+    recentArticlesResult,
+    sourcesResult,
+    statsData
+  ] = await Promise.all([
+    safeQuery('user', supabase.auth.getUser(), { data: { user: null } }),
+    safeQuery(
+      'recent articles',
+      supabase
+        .from('articles')
+        .select('id, title, description, url, category, image_url, published_at, sources(name)')
+        .lte('published_at', nowIso)
+        .order('published_at', { ascending: false })
+        .limit(220),
+      { data: [], error: null }
+    ),
+    getCachedSources(),
+    getCachedStats(startOfDayIso, nowIso)
+  ]);
 
   const user = userResult?.data?.user ?? null;
   const recentArticlesPool = Array.isArray(recentArticlesResult?.data)
@@ -195,10 +215,10 @@ export default async function Home() {
   ).size;
 
   const stats = buildStats({
-    sourceCount: Number(activeSourceCountResult?.count || 0),
-    articleCount: Number(articleCountResult?.count || 0),
-    categories: Number(categoryCount || 0),
-    todayCount: Number(todayCountResult?.count || 0),
+    sourceCount: statsData.sourceCount,
+    articleCount: statsData.articleCount,
+    categories: categoryCount,
+    todayCount: statsData.todayCount,
   });
 
   return (

@@ -1,5 +1,6 @@
 'use server';
 
+import { cache } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
@@ -49,7 +50,7 @@ export async function toggleBookmark(articleId) {
 /**
  * Get bookmark status for multiple articles
  */
-export async function getBookmarkedArticleIds() {
+export const getBookmarkedArticleIds = cache(async () => {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -61,4 +62,4 @@ export async function getBookmarkedArticleIds() {
     .eq('user_id', user.id);
 
   return (data || []).map((b) => b.article_id);
-}
+});

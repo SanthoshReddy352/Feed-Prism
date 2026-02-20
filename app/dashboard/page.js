@@ -8,60 +8,54 @@ export default async function DashboardPage({ searchParams }) {
   const page = Number((await searchParams)?.page) || 1;
   const itemsPerPage = 21;
 
-  // Get user preferences
-  const userPreferences = await getPreferences();
-  const bookmarkedIds = await getBookmarkedArticleIds();
+  // Fetch preferences and bookmarks in parallel
+  const [userPreferences, bookmarkedIds] = await Promise.all([
+    getPreferences(),
+    getBookmarkedArticleIds(),
+  ]);
 
-  // Base query
-  let query = supabase
-    .from('articles')
-    .select('*, sources!inner(name)', { count: 'exact' })
-    .lte('published_at', new Date().toISOString());
+  // Base query for articles
+  const buildQuery = () => {
+    let q = supabase
+      .from('articles')
+      .select('*, sources!inner(name)', { count: 'exact' })
+      .lte('published_at', new Date().toISOString());
 
-  // Apply filters
-  if (userPreferences?.preferred_categories?.length) {
-    query = query.in('category', userPreferences.preferred_categories);
-  }
-  
-  if (userPreferences?.preferred_sources?.length) {
-    query = query.in('source_id', userPreferences.preferred_sources);
-  }
+    if (userPreferences?.preferred_categories?.length) {
+      q = q.in('category', userPreferences.preferred_categories);
+    }
+    
+    if (userPreferences?.preferred_sources?.length) {
+      q = q.in('source_id', userPreferences.preferred_sources);
+    }
 
-  // Calculate range
-  // Page 1: Featured (0-2), List (3-20)
-  // Page 2+: List ((page-1)*21 - (page*21)-1)
-  
+    return q.order('published_at', { ascending: false });
+  };
+
   let featuredArticles = [];
   let articles = [];
   let count = 0;
 
   try {
     if (page === 1) {
-      // Fetch Featured (Top 3)
-      const { data: featured } = await query
-        .order('published_at', { ascending: false })
-        .range(0, 2);
+      // Fetch Featured and First Page articles in parallel
+      const [featuredRes, listRes] = await Promise.all([
+        buildQuery().range(0, 2),
+        buildQuery().range(3, 20)
+      ]);
       
-      featuredArticles = featured || [];
-
-      // Fetch List (Next 18)
-      const { data: list, count: totalCount } = await query
-        .order('published_at', { ascending: false })
-        .range(3, 20);
-      
-      articles = list || [];
-      count = totalCount;
+      featuredArticles = featuredRes.data || [];
+      articles = listRes.data || [];
+      count = listRes.count || 0;
     } else {
-      // Fetch List (Standard Page)
+      // Fetch List (Next Pages)
       const from = (page - 1) * itemsPerPage;
       const to = from + itemsPerPage - 1;
       
-      const { data: list, count: totalCount } = await query
-        .order('published_at', { ascending: false })
-        .range(from, to);
+      const { data: list, count: totalCount } = await buildQuery().range(from, to);
         
       articles = list || [];
-      count = totalCount;
+      count = totalCount || 0;
     }
   } catch (error) {
     console.error('Error fetching articles:', error);
@@ -74,8 +68,8 @@ export default async function DashboardPage({ searchParams }) {
       initialPagination={{
         page,
         limit: itemsPerPage,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / itemsPerPage),
+        total: count,
+        totalPages: Math.ceil(count / itemsPerPage),
       }}
       bookmarkedIds={bookmarkedIds}
       viewMode={userPreferences?.view_mode || 'detailed'}

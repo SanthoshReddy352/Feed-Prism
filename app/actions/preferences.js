@@ -1,12 +1,13 @@
 'use server';
 
+import { cache } from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 /**
  * Get user preferences
  */
-export async function getPreferences() {
+export const getPreferences = cache(async () => {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -23,7 +24,7 @@ export async function getPreferences() {
     preferred_sources: [],
     view_mode: 'detailed',
   };
-}
+});
 
 /**
  * Update user preferences
