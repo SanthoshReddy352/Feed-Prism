@@ -1,0 +1,341 @@
+/* Card Container */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Ensures identical height in grid */
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--accent-primary-soft);
+}
+
+/* Image */
+.imageContainer {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg-tertiary);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card:hover .image {
+  transform: scale(1.05);
+}
+
+/* Content */
+.content {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Pushes footer to bottom */
+  gap: 0.75rem;
+}
+
+.meta {
+  display: flex;
+  align-items: flex-start; /* Align top if wrapping happens */
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+}
+
+.metaLeft {
+  display: flex;
+  flex-wrap: wrap; /* Allow grouping to wrap if needed */
+  gap: 0.5rem;
+  align-items: center;
+  flex: 1; /* Take available width */
+  min-width: 0;
+}
+
+.sourceBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  /* background: var(--accent-primary-soft); Remove background to reduce clutter as per screenshot preference often implies cleaner look */
+  padding: 0; /* Remove padding if removing background */
+  border-radius: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.categoryBadge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+  white-space: nowrap; /* Keep category on one line */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeAgo {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.timeIcon {
+  display: inline;
+  margin-right: 4px;
+  vertical-align: text-top;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+  line-height: 1.4;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.15s ease;
+}
+
+.title:hover {
+  color: var(--accent-primary);
+}
+
+.description {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+  flex: 1; /* Takes available space */
+}
+
+/* Footer / Actions */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.author {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 0; /* Allow flex child to shrink */
+}
+
+.authorName {
+  /* Truncate long author names */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;
+}
+
+.bookmarkBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bookmarkBtn:hover {
+  background: var(--bg-tertiary);
+  color: var(--accent-primary);
+  transform: scale(1.1);
+}
+
+.bookmarkBtn.bookmarked {
+  color: var(--status-warning); /* Gold/Yellow for bookmark */
+}
+.bookmarkBtn.bookmarked svg {
+  fill: currentColor;
+}
+
+.bookmarkBtn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+/* ===== Compact Mode ===== */
+.cardCompact {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.cardCompact:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-surface-hover);
+  transform: translateX(4px);
+}
+
+.compactContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.compactMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 120px;
+  gap: 0.25rem;
+}
+
+.compactBadge {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.4rem;
+}
+
+.compactTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: none;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compactTitle:hover {
+  color: var(--accent-primary);
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 1rem;
+  }
+
+  .meta {
+    flex-wrap: wrap;
+    margin-bottom: 0.25rem;
+  }
+
+  .title {
+    font-size: 1rem;
+  }
+
+  .authorName {
+    max-width: 110px;
+  }
+
+  .cardCompact {
+    padding: 0.875rem 1rem;
+    gap: 0.75rem;
+  }
+
+  .compactContent {
+    gap: 0.75rem;
+  }
+
+  .compactMeta {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .cardCompact:hover {
+    transform: none;
+  }
+
+  .cardCompact {
+    align-items: flex-start;
+    gap: 0.625rem;
+    padding: 0.8rem 0.875rem;
+  }
+
+  .compactContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+  }
+
+  .compactMeta {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 0.375rem;
+  }
+
+  .compactTitle {
+    width: 100%;
+    white-space: normal;
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .bookmarkBtn {
+    padding: 0.4rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .sourceBadge {
+    font-size: 0.7rem;
+  }
+
+  .categoryBadge {
+    font-size: 0.65rem;
+    padding: 0.125rem 0.4rem;
+  }
+
+  .timeAgo {
+    font-size: 0.7rem;
+  }
+
+  .title {
+    font-size: 0.95rem;
+  }
+}

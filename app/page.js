@@ -1,65 +1,218 @@
-import Image from "next/image";
+import { createClient } from '@/lib/supabase/server';
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import Features from './components/Features';
+import LivePreview from './components/LivePreview';
+import TrustedSources from './components/TrustedSources';
+import Stats from './components/Stats';
+import CallToAction from './components/CallToAction';
+import Footer from './components/Footer';
 
-export default function Home() {
+const BLOCKED_SOURCE_PATTERNS = [
+  'hugging face',
+  'hacker news',
+  'arxiv ai',
+  'marketwatch - topstories',
+  'seeking alpha - market news',
+  'yahoo finance - stock market',
+  'investing.com - stock market',
+  'cloudflare status',
+  'coloudflare status',
+  'bloomberg business',
+  'bloom berg business',
+  'google news - ai tools',
+];
+
+const LANDING_CATEGORY_ORDER = [
+  'Technology',
+  'AI & ML',
+  'Global News',
+  'Outbreaks & Health',
+  'Company News',
+  'Cloud & Infrastructure',
+  'Developer & Engineering',
+  'Startups',
+  'Security',
+  'AI Tools',
+  'Business',
+  'Stocks & Trading',
+];
+
+function buildStats({ sourceCount, articleCount, categories, todayCount }) {
+  return [
+    { value: sourceCount, suffix: '', label: 'Active Sources', prefix: '' },
+    { value: articleCount, suffix: '+', label: 'Articles Indexed', prefix: '' },
+    { value: todayCount, suffix: '', label: 'Published Today', prefix: '' },
+    { value: categories, suffix: '', label: 'Categories', prefix: '' },
+  ];
+}
+
+async function safeQuery(label, queryPromise, fallback) {
+  try {
+    const result = await queryPromise;
+    return result ?? fallback;
+  } catch (error) {
+    console.error(`[home] ${label} query failed`, error);
+    return fallback;
+  }
+}
+
+function normalizeText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isBlockedSource(sourceName) {
+  const normalized = normalizeText(sourceName);
+  return BLOCKED_SOURCE_PATTERNS.some((pattern) => normalized.includes(pattern));
+}
+
+function hasValidDescription(article) {
+  return Boolean(normalizeText(article?.description));
+}
+
+function selectLandingArticlesByCategory(articles, totalNeeded = 12) {
+  const normalizedCategories = new Set(
+    LANDING_CATEGORY_ORDER.map((category) => normalizeText(category))
+  );
+  const buckets = new Map();
+
+  for (const category of LANDING_CATEGORY_ORDER) {
+    buckets.set(normalizeText(category), []);
+  }
+
+  for (const article of articles) {
+    const key = normalizeText(article?.category);
+    if (!normalizedCategories.has(key)) continue;
+    buckets.get(key).push(article);
+  }
+
+  const selected = [];
+  const selectedIds = new Set();
+
+  for (const category of LANDING_CATEGORY_ORDER) {
+    const key = normalizeText(category);
+    const bucket = buckets.get(key) || [];
+    const pick = bucket.find((article) => !selectedIds.has(article.id));
+    if (!pick) continue;
+    selected.push(pick);
+    selectedIds.add(pick.id);
+  }
+
+  if (selected.length < totalNeeded) {
+    for (const article of articles) {
+      if (selectedIds.has(article.id)) continue;
+      selected.push(article);
+      selectedIds.add(article.id);
+      if (selected.length >= totalNeeded) break;
+    }
+  }
+
+  return selected.slice(0, totalNeeded);
+}
+
+export default async function Home() {
+  const supabase = await createClient();
+  const nowIso = new Date().toISOString();
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  const startOfDayIso = startOfDay.toISOString();
+
+  const userResult = await safeQuery(
+    'user',
+    supabase.auth.getUser(),
+    { data: { user: null } }
+  );
+
+  const recentArticlesResult = await safeQuery(
+    'recent articles',
+    supabase
+      .from('articles')
+      .select('id, title, description, url, category, image_url, published_at, sources(name)')
+      .lte('published_at', nowIso)
+      .order('published_at', { ascending: false })
+      .limit(220),
+    { data: [], error: null }
+  );
+
+  const sourcesResult = await safeQuery(
+    'sources',
+    supabase
+      .from('sources')
+      .select('name, category')
+      .eq('is_active', true)
+      .order('name')
+      .limit(200),
+    { data: [], error: null }
+  );
+
+  const activeSourceCountResult = await safeQuery(
+    'source count',
+    supabase
+      .from('sources')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_active', true),
+    { count: 0 }
+  );
+
+  const articleCountResult = await safeQuery(
+    'article count',
+    supabase
+      .from('articles')
+      .select('*', { count: 'exact', head: true }),
+    { count: 0 }
+  );
+
+  const todayCountResult = await safeQuery(
+    'today article count',
+    supabase
+      .from('articles')
+      .select('*', { count: 'exact', head: true })
+      .gte('published_at', startOfDayIso)
+      .lte('published_at', nowIso),
+    { count: 0 }
+  );
+
+  const user = userResult?.data?.user ?? null;
+  const recentArticlesPool = Array.isArray(recentArticlesResult?.data)
+    ? recentArticlesResult.data
+    : [];
+
+  const filteredLandingArticles = recentArticlesPool
+    .filter((article) => hasValidDescription(article))
+    .filter((article) => !isBlockedSource(article?.sources?.name));
+
+  const landingSelection = selectLandingArticlesByCategory(filteredLandingArticles, 12);
+  const heroArticles = landingSelection.slice(0, 3);
+  const previewArticles = landingSelection.slice(3, 12);
+
+  const sourceRows = Array.isArray(sourcesResult?.data) ? sourcesResult.data : [];
+  const trustedSourceNames = sourceRows.map((source) => source.name).filter(Boolean);
+  const categoryCount = new Set(
+    sourceRows.map((source) => source.category).filter(Boolean)
+  ).size;
+
+  const stats = buildStats({
+    sourceCount: Number(activeSourceCountResult?.count || 0),
+    articleCount: Number(articleCountResult?.count || 0),
+    categories: Number(categoryCount || 0),
+    todayCount: Number(todayCountResult?.count || 0),
+  });
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <>
+      <Navbar user={user} />
+      <main>
+        <Hero user={user} spotlightArticles={heroArticles} />
+        <Features />
+        <TrustedSources sources={trustedSourceNames} />
+        <LivePreview articles={previewArticles} />
+        <Stats stats={stats} />
+        <CallToAction />
       </main>
-    </div>
+      <Footer />
+    </>
   );
 }

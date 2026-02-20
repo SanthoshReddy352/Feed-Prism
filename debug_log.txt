@@ -1,0 +1,25 @@
+Fetching https://huggingface.co/blog/feed.xml...
+Fetched 215299 bytes.
+Detected RSS
+Found 737 items. Analyzing first 1...
+--- Item Keys ---
+["title","pubDate","link","guid"]
+--- Title --- Train AI models with Unsloth and Hugging Face Jobs for FREE
+--- Title (resolved) --- Train AI models with Unsloth and Hugging Face Jobs for FREE
+--- Description is missing ---
+--- Content:Encoded is missing ---
+--- Summary is missing ---
+--- Content is missing ---
+Fetching https://hnrss.org/frontpage...
+Fetched 19998 bytes.
+Detected RSS
+Found 20 items. Analyzing first 1...
+--- Item Keys ---
+["title","description","pubDate","link","dc:creator","comments","guid"]
+--- Title --- Microsoft's new 10k-year data storage medium: glass
+--- Title (resolved) --- Microsoft's new 10k-year data storage medium: glass
+--- Description (first 100) --- 
+Article URL: https://arstechnica.com/science/2026/02/microsofts-new-10000-year-data-storage-medium-
+--- Content:Encoded is missing ---
+--- Summary is missing ---
+--- Content is missing ---

@@ -1,0 +1,12 @@
+.pageHeader { margin-bottom: 1.5rem; }
+.pageTitle { font-size: 1.75rem; font-weight: 700; color: var(--text-primary, #e4e4e7); margin: 0 0 0.375rem; }
+.pageSubtitle { color: var(--text-muted, #71717a); font-size: 0.875rem; margin: 0; }
+.categoryBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #818cf8;
+  background: rgba(99, 102, 241, 0.1);
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  margin-right: 0.5rem;
+}
