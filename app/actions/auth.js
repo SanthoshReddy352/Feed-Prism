@@ -33,11 +33,16 @@ export async function signup(formData) {
     return { error: 'Password must be at least 6 characters.' };
   }
 
+  const headerList = await headers();
+  const host = headerList.get('host');
+  const protocol = host?.includes('localhost') ? 'http' : 'https';
+  const origin = headerList.get('origin') || `${protocol}://${host}`;
+
   const { error } = await supabase.auth.signUp({
     email: formData.get('email'),
     password: password,
     options: {
-      emailRedirectTo: `${(await headers()).get('origin')}/auth/callback`,
+      emailRedirectTo: `${origin}/auth/callback`,
     },
   });
 
@@ -56,7 +61,10 @@ export async function logout() {
 
 export async function loginWithGoogle() {
   const supabase = await createClient();
-  const origin = (await headers()).get('origin');
+  const headerList = await headers();
+  const host = headerList.get('host');
+  const protocol = host?.includes('localhost') ? 'http' : 'https';
+  const origin = headerList.get('origin') || `${protocol}://${host}`;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
