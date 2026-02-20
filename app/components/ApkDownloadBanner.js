@@ -19,12 +19,28 @@ function readDismissed() {
   }
 }
 
+function isNativeAppRuntime() {
+  if (typeof window === 'undefined') return false;
+
+  try {
+    if (Capacitor.isNativePlatform()) return true;
+  } catch {}
+
+  const cap = window.Capacitor;
+  const platform = cap?.getPlatform?.() ?? cap?.platform;
+  if (platform && platform !== 'web') return true;
+
+  if (document.documentElement.classList.contains('native-app-shell')) return true;
+
+  return false;
+}
+
 export default function ApkDownloadBanner() {
   const hydrated = useHydrated();
   const pathname = usePathname();
   const [dismissedInSession, setDismissedInSession] = useState(false);
 
-  const isNative = hydrated && Capacitor.isNativePlatform();
+  const isNative = hydrated && isNativeAppRuntime();
   const isPersistedDismissed = hydrated && readDismissed();
   const isDashboardRoute = pathname?.startsWith('/dashboard');
 
