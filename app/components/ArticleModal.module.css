@@ -111,13 +111,15 @@
 
 @media (max-width: 640px) {
   .overlay {
-    padding: 0.625rem;
+    padding: max(0.625rem, var(--app-safe-top))
+      0.625rem
+      calc(0.625rem + var(--app-safe-bottom));
     align-items: flex-end;
   }
 
   .modal {
     border-radius: 16px;
-    max-height: 92vh;
+    max-height: calc(100dvh - var(--app-safe-top) - var(--app-safe-bottom) - 1.25rem);
     padding: 1rem;
   }
 

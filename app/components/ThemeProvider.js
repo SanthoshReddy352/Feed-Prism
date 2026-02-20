@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useMemo, useSyncExternalStore } from 'react';
+import { Capacitor } from '@capacitor/core';
 
 const THEME_KEY = 'feed-prism-theme';
 const THEME_EVENT = 'feedprism-theme-change';
@@ -56,6 +57,19 @@ export default function ThemeProvider({ children }) {
     readThemeFromBrowser,
     () => 'light'
   );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!Capacitor.isNativePlatform()) return;
+
+    document.documentElement.classList.add('native-app-shell');
+    document.body.classList.add('native-app-shell');
+
+    return () => {
+      document.documentElement.classList.remove('native-app-shell');
+      document.body.classList.remove('native-app-shell');
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;

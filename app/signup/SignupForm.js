@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { signup } from '@/app/actions/auth';
 import { loginWithGoogle } from '@/app/actions/auth';
 import styles from '../login/page.module.css';
@@ -31,7 +32,10 @@ export default function SignupForm() {
 
   async function handleGoogleLogin() {
     setGoogleLoading(true);
-    const result = await loginWithGoogle();
+    const redirectToOverride = Capacitor.isNativePlatform()
+      ? 'com.feedprism.app://auth/callback'
+      : undefined;
+    const result = await loginWithGoogle(redirectToOverride);
     if (result?.error) {
       setError(result.error);
       setGoogleLoading(false);

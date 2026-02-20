@@ -1,6 +1,6 @@
 .navbarWrap {
   position: fixed;
-  top: 0;
+  top: var(--app-safe-top);
   left: 0;
   right: 0;
   z-index: 1100;
@@ -125,9 +125,9 @@
 
 .drawer {
   position: fixed;
-  top: 0;
+  top: var(--app-safe-top);
   right: 0;
-  height: 100dvh;
+  height: calc(100dvh - var(--app-safe-top) - var(--app-safe-bottom));
   width: min(86vw, 330px);
   transform: translateX(102%);
   background:
@@ -152,7 +152,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.6rem;
-  padding: calc(0.85rem + env(safe-area-inset-top, 0px)) 0.95rem 0.85rem;
+  padding: 0.85rem 0.95rem;
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -189,7 +189,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
-  padding-bottom: calc(0.95rem + env(safe-area-inset-bottom, 0px));
+  padding-bottom: 0.95rem;
 }
 
 .themeToggleDrawer {

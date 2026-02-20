@@ -1,8 +1,8 @@
 .sidebar {
   position: fixed;
-  top: 0;
+  top: var(--app-safe-top);
   left: 0;
-  height: 100dvh;
+  height: calc(100dvh - var(--app-safe-top) - var(--app-safe-bottom));
   width: var(--sidebar-width);
   max-width: 100%;
   background: var(--sidebar-bg);
@@ -12,7 +12,7 @@
   z-index: 50;
   transform: translateX(0);
   transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 1.25rem 0 calc(1rem + env(safe-area-inset-bottom, 0px));
+  padding: 1.25rem 0 1rem;
 }
 
 .header {
@@ -259,7 +259,7 @@
     width: min(88vw, 320px);
     transform: translateX(-100%);
     box-shadow: var(--shadow-card);
-    padding-top: calc(0.85rem + env(safe-area-inset-top, 0px));
+    padding-top: 0.85rem;
   }
 
   .sidebarOpen {

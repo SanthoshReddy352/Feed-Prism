@@ -80,6 +80,12 @@
   --nav-bg: rgba(3, 7, 18, 0.8);
   --nav-bg-scroll: rgba(3, 7, 18, 0.95);
   --sidebar-bg: var(--bg-primary);
+
+  /* Safe-area tokens (default web behavior) */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --app-safe-top: var(--safe-area-top);
+  --app-safe-bottom: var(--safe-area-bottom);
 }
 
 [data-theme="light"] {
@@ -149,6 +155,15 @@ html {
   scroll-behavior: smooth;
 }
 
+html.native-app-shell {
+  /*
+    Keep strict margins from device chrome in native builds,
+    even on Android variants where safe-area env values are 0.
+  */
+  --app-safe-top: max(var(--safe-area-top), 16px);
+  --app-safe-bottom: max(var(--safe-area-bottom), 16px);
+}
+
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -158,6 +173,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
   min-height: 100vh;
+}
+
+.app-safe-area-shell {
+  min-height: calc(100dvh - var(--app-safe-top) - var(--app-safe-bottom));
+  padding-top: var(--app-safe-top);
+  padding-bottom: var(--app-safe-bottom);
 }
 
 /* --- Logo Styles --- */

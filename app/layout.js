@@ -1,5 +1,6 @@
 import { Inter, JetBrains_Mono } from "next/font/google";
 import ThemeProvider from "./components/ThemeProvider";
+import CapacitorDeepLinkHandler from "./components/CapacitorDeepLinkHandler";
 import "./globals.css";
 
 const inter = Inter({
@@ -37,11 +38,20 @@ export const metadata = {
   },
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" data-theme="light" suppressHydrationWarning>
       <body className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <CapacitorDeepLinkHandler />
+          <div className="app-safe-area-shell">{children}</div>
+        </ThemeProvider>
       </body>
     </html>
   );
