@@ -1,6 +1,7 @@
 import { Inter, JetBrains_Mono } from "next/font/google";
 import ThemeProvider from "./components/ThemeProvider";
 import CapacitorDeepLinkHandler from "./components/CapacitorDeepLinkHandler";
+import AndroidBackButtonHandler from "./components/AndroidBackButtonHandler";
 import ApkDownloadBanner from "./components/ApkDownloadBanner";
 import "./globals.css";
 
@@ -51,6 +52,7 @@ export default function RootLayout({ children }) {
       <body className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
         <ThemeProvider>
           <CapacitorDeepLinkHandler />
+          <AndroidBackButtonHandler />
           <ApkDownloadBanner />
           <div className="app-safe-area-shell">{children}</div>
         </ThemeProvider>
