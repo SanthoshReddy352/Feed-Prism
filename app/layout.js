@@ -1,4 +1,5 @@
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import ThemeProvider from "./components/ThemeProvider";
 import CapacitorDeepLinkHandler from "./components/CapacitorDeepLinkHandler";
 import AndroidBackButtonHandler from "./components/AndroidBackButtonHandler";
@@ -56,6 +57,7 @@ export default function RootLayout({ children }) {
           <ApkDownloadBanner />
           <div className="app-safe-area-shell">{children}</div>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
