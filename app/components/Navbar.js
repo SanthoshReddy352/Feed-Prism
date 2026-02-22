@@ -7,10 +7,10 @@ import { SunIcon, MoonIcon, MenuIcon, CloseIcon } from './icons';
 import styles from './Navbar.module.css';
 
 const NAV_LINKS = [
-  { label: 'Features', href: '#features' },
-  { label: 'Sources', href: '#sources' },
-  { label: 'Preview', href: '#preview' },
-  { label: 'Stats', href: '#stats' },
+  { label: 'Features', href: '/#features' },
+  { label: 'Sources', href: '/#sources' },
+  { label: 'Preview', href: '/#preview' },
+  { label: 'Stats', href: '/#stats' },
 ];
 
 export default function Navbar({ user }) {
@@ -59,9 +59,9 @@ export default function Navbar({ user }) {
 
           <div className={styles.navLinks}>
             {NAV_LINKS.map((link) => (
-              <a key={link.href} href={link.href} className={styles.navLink}>
+              <Link key={link.href} href={link.href} className={styles.navLink}>
                 {link.label}
-              </a>
+              </Link>
             ))}
           </div>
 
@@ -124,14 +124,14 @@ export default function Navbar({ user }) {
 
         <div className={styles.drawerLinks}>
           {NAV_LINKS.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               className={styles.drawerLink}
               onClick={() => setMobileOpen(false)}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </div>
 
