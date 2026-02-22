@@ -21,23 +21,25 @@ function getTimeAgo(dateString) {
   return `${days} day${days > 1 ? 's' : ''} ago`;
 }
 
-export default function LivePreview({ articles = [] }) {
+export default function LivePreview({ articles = [], hideHeader = false }) {
   const [selectedArticle, setSelectedArticle] = useState(null);
   const previewArticles = articles.slice(0, 9);
 
   return (
     <>
-      <section id="preview" className="section">
-        <div className="container">
-          <ScrollReveal>
-            <div className={styles.header}>
-              <span className="section-label">Live Preview</span>
-              <h2 className="section-title">Live feed snapshot</h2>
-              <p className="section-subtitle">
-                Streaming headlines from your latest ingested articles.
-              </p>
-            </div>
-          </ScrollReveal>
+      <section id="preview" className={hideHeader ? '' : 'section'}>
+        <div className={hideHeader ? '' : 'container'}>
+          {!hideHeader && (
+            <ScrollReveal>
+              <div className={styles.header}>
+                <span className="section-label">Live Preview</span>
+                <h2 className="section-title">Live feed snapshot</h2>
+                <p className="section-subtitle">
+                  Streaming headlines from your latest ingested articles.
+                </p>
+              </div>
+            </ScrollReveal>
+          )}
 
           {previewArticles.length === 0 ? (
             <div className={styles.emptyState}>

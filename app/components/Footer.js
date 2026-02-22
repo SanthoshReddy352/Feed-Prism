@@ -1,8 +1,32 @@
+import Link from 'next/link';
 import styles from './Footer.module.css';
 
-const CATEGORIES = ['Technology', 'AI & ML', 'Global News', 'Outbreaks', 'Companies', 'Security', 'Startups'];
-const PRODUCT_LINKS = ['Features', 'Sources', 'Categories', 'Dashboard', 'API'];
-const COMPANY_LINKS = ['About', 'Blog', 'Privacy', 'Terms'];
+const CATEGORIES = [
+  { label: 'Technology', href: '/category/Technology' },
+  { label: 'AI & ML', href: '/category/AI & ML' },
+  { label: 'Global News', href: '/category/Global News' },
+  { label: 'Outbreaks', href: '/category/Outbreaks & Health' },
+  { label: 'Companies', href: '/category/Company News' },
+  { label: 'Cloud & Infra', href: '/category/Cloud & Infrastructure' },
+  { label: 'Developer', href: '/category/Developer & Engineering' },
+  { label: 'Startups', href: '/category/Startups' },
+  { label: 'Security', href: '/category/Security' },
+  { label: 'AI Tools', href: '/category/AI Tools' },
+  { label: 'Business', href: '/category/Business' },
+  { label: 'Stocks', href: '/category/Stocks & Trading' }
+];
+
+const PRODUCT_LINKS = [
+  { label: 'Features', href: '/#features' },
+  { label: 'Sources', href: '/#sources' },
+];
+
+const COMPANY_LINKS = [
+  { label: 'About', href: '/about' },
+  { label: 'Blog', href: '/blog' },
+  { label: 'Privacy', href: '/privacy' },
+  { label: 'Terms', href: '/terms' }
+];
 
 export default function Footer() {
   return (
@@ -11,7 +35,7 @@ export default function Footer() {
         <div className={styles.grid}>
           {/* Brand */}
           <div className={styles.brand}>
-            <a href="#" className={styles.logo}>
+            <Link href="/" className={styles.logo}>
               <img 
                 src="/Mobile Logo.svg" 
                 alt="" 
@@ -20,12 +44,12 @@ export default function Footer() {
                 height={32}
               />
               <span className={styles.logoText}>Feed Prism</span>
-            </a>
+            </Link>
             <p className={styles.brandDesc}>
               Your intelligent news command center. Aggregating, filtering, and delivering the news that matters.
             </p>
             <p className={styles.tech}>
-              Built with Next.js & Supabase
+              Built with Next.js, Supabase & RSS
             </p>
           </div>
 
@@ -34,8 +58,8 @@ export default function Footer() {
             <h4 className={styles.columnTitle}>Product</h4>
             <ul className={styles.linkList}>
               {PRODUCT_LINKS.map(link => (
-                <li key={link}>
-                  <a href="#" className={styles.link}>{link}</a>
+                <li key={link.label}>
+                  <Link href={link.href} className={styles.link}>{link.label}</Link>
                 </li>
               ))}
             </ul>
@@ -44,10 +68,10 @@ export default function Footer() {
           {/* Categories */}
           <div className={styles.column}>
             <h4 className={styles.columnTitle}>Categories</h4>
-            <ul className={styles.linkList}>
+            <ul className={styles.categoryList}>
               {CATEGORIES.map(cat => (
-                <li key={cat}>
-                  <a href="#" className={styles.link}>{cat}</a>
+                <li key={cat.label}>
+                  <Link href={cat.href} className={styles.link}>{cat.label}</Link>
                 </li>
               ))}
             </ul>
@@ -58,8 +82,8 @@ export default function Footer() {
             <h4 className={styles.columnTitle}>Company</h4>
             <ul className={styles.linkList}>
               {COMPANY_LINKS.map(link => (
-                <li key={link}>
-                  <a href="#" className={styles.link}>{link}</a>
+                <li key={link.label}>
+                  <Link href={link.href} className={styles.link}>{link.label}</Link>
                 </li>
               ))}
             </ul>
