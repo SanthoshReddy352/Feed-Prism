@@ -48,6 +48,7 @@ const NAV_ITEMS = [
   { href: '/dashboard/scheduled', icon: CalendarClock, label: 'Scheduled' },
   { href: '/dashboard/bookmarks', icon: Bookmark, label: 'Bookmarks' },
   { href: '/dashboard/search', icon: Search, label: 'Search' },
+  { href: '/dashboard/developers', icon: Code2, label: 'Developers' },
   { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
 ];
 
