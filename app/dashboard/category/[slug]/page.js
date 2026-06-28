@@ -33,19 +33,25 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function CategoryPage({ params }) {
+export default async function CategoryPage({ params, searchParams }) {
   const { slug } = await params;
   const category = SLUG_TO_CATEGORY[slug] || slug;
 
   const supabase = await createClient();
   const bookmarkedIds = await getBookmarkedArticleIds();
 
+  const limit = 24;
+  const page = Math.max(1, Number((await searchParams)?.page) || 1);
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
   const { data: articles, count } = await supabase
     .from('articles')
     .select('*, sources!inner(name)', { count: 'exact' })
     .eq('category', category)
     .order('published_at', { ascending: false })
-    .range(0, 23);
+    .order('id', { ascending: false })
+    .range(from, to);
 
   return (
     <div>
@@ -59,10 +65,10 @@ export default async function CategoryPage({ params }) {
       <CategoryFeed
         articles={articles || []}
         pagination={{
-          page: 1,
-          limit: 24,
+          page,
+          limit,
           total: count || 0,
-          totalPages: Math.ceil((count || 0) / 24),
+          totalPages: Math.ceil((count || 0) / limit),
         }}
         bookmarkedIds={bookmarkedIds}
         category={category}

@@ -1,135 +1,76 @@
 -- ============================================================
--- Feed Prism — Extended Seed RSS Sources (v2)
--- Run this in Supabase SQL Editor AFTER schema.sql
--- If you already ran the old seed, just run the NEW SOURCES
--- section below (marked clearly).
+-- Feed Prism — Curated & accredited RSS sources (58 feeds, 12 categories)
+-- ============================================================
+-- All feeds were live-validated (HTTP 200 + parseable + has items) on
+-- 2026-06-28. Aggregators with rotating URLs (e.g. Google News) are excluded
+-- in favour of publisher-native feeds so deduplication stays clean.
+--
+-- Run in the Supabase SQL Editor. Idempotent: re-running updates name/category
+-- for existing feeds (matched on rss_url) and adds any new ones.
+-- To wipe and reseed from scratch instead, run first:
+--   truncate table public.sources cascade;   -- also clears articles/bookmarks
 -- ============================================================
 
--- ============================================================
--- CLEAR OLD DATA & RESEED (only if starting fresh)
--- Uncomment the next line to wipe and reseed:
--- truncate public.sources cascade;
--- ============================================================
-
--- ============================
--- CORE TECH MEDIA
--- ============================
-insert into public.sources (name, rss_url, category) values
-    ('TechCrunch', 'https://techcrunch.com/feed/', 'Technology'),
-    ('The Verge', 'https://www.theverge.com/rss/index.xml', 'Technology'),
-    ('Ars Technica', 'https://feeds.arstechnica.com/arstechnica/index', 'Technology'),
-    ('Wired', 'https://www.wired.com/feed/rss', 'Technology'),
-    ('MIT Technology Review', 'https://www.technologyreview.com/feed/', 'Technology'),
-    ('VentureBeat', 'https://venturebeat.com/feed/', 'Technology')
-on conflict (rss_url) do nothing;
-
--- ============================
--- AI & RESEARCH
--- ============================
-insert into public.sources (name, rss_url, category) values
-    ('OpenAI Blog', 'https://openai.com/blog/rss.xml', 'AI & ML'),
-    ('Google DeepMind Blog', 'https://blog.research.google/feeds/posts/default?alt=rss', 'AI & ML'),
-    ('Anthropic Blog', 'https://www.anthropic.com/feed.xml', 'AI & ML'),
-    ('Meta AI Research', 'https://ai.meta.com/blog/rss/', 'AI & ML'),
-    ('Hugging Face Blog', 'https://huggingface.co/blog/feed.xml', 'AI & ML'),
-    ('arXiv AI', 'https://rss.arxiv.org/rss/cs.AI', 'AI & ML'),
-    ('Papers with Code', 'https://paperswithcode.com/latest/rss', 'AI & ML')
-on conflict (rss_url) do nothing;
-
--- ============================
--- CYBERSECURITY & OUTBREAKS
--- ============================
-insert into public.sources (name, rss_url, category) values
-    ('BleepingComputer', 'https://www.bleepingcomputer.com/feed/', 'Security'),
-    ('The Hacker News', 'https://feeds.feedburner.com/TheHackersNews', 'Security'),
-    ('Krebs on Security', 'https://krebsonsecurity.com/feed/', 'Security'),
-    ('Dark Reading', 'https://www.darkreading.com/rss.xml', 'Security'),
-    ('WHO News', 'https://www.who.int/rss-feeds/news-english.xml', 'Outbreaks & Health'),
-    ('CDC Newsroom', 'https://tools.cdc.gov/api/v2/resources/media/rss', 'Outbreaks & Health')
-on conflict (rss_url) do nothing;
-
--- ============================
--- BIG COMPANY OFFICIAL SOURCES
--- ============================
-insert into public.sources (name, rss_url, category) values
-    ('Google Official Blog', 'https://blog.google/rss/', 'Company News'),
-    ('Meta Newsroom', 'https://about.fb.com/news/feed/', 'Company News'),
-    ('Microsoft Blog', 'https://blogs.microsoft.com/feed/', 'Company News'),
-    ('Amazon Press Center', 'https://press.aboutamazon.com/rss/news-releases/', 'Company News'),
-    ('Apple Newsroom', 'https://www.apple.com/newsroom/rss-feed.rss', 'Company News'),
-    ('NVIDIA Blog', 'https://blogs.nvidia.com/feed/', 'Company News')
-on conflict (rss_url) do nothing;
-
--- ============================
--- CLOUD / INFRASTRUCTURE STATUS
--- ============================
-insert into public.sources (name, rss_url, category) values
-    ('Google Cloud Status', 'https://status.cloud.google.com/feed.atom', 'Cloud & Infrastructure'),
-    ('AWS Status', 'https://status.aws.amazon.com/rss/all.rss', 'Cloud & Infrastructure'),
-    ('Azure Status', 'https://azure.status.microsoft/en-us/status/feed/', 'Cloud & Infrastructure'),
-    ('Cloudflare Status', 'https://www.cloudflarestatus.com/history.atom', 'Cloud & Infrastructure')
-on conflict (rss_url) do nothing;
-
--- ============================
--- DEVELOPER & ENGINEERING BLOGS
--- ============================
-insert into public.sources (name, rss_url, category) values
-    ('Netflix Tech Blog', 'https://netflixtechblog.com/feed', 'Developer & Engineering'),
-    ('Uber Engineering', 'https://www.uber.com/en-US/blog/engineering/rss/', 'Developer & Engineering'),
-    ('Airbnb Engineering', 'https://medium.com/feed/airbnb-engineering', 'Developer & Engineering'),
-    ('Stripe Engineering', 'https://stripe.com/blog/feed.rss', 'Developer & Engineering'),
-    ('GitHub Blog', 'https://github.blog/feed/', 'Developer & Engineering')
-on conflict (rss_url) do nothing;
-
--- ============================
--- GLOBAL NEWS
--- ============================
-insert into public.sources (name, rss_url, category) values
-    ('BBC World', 'https://feeds.bbci.co.uk/news/world/rss.xml', 'Global News'),
-    ('Reuters World', 'https://www.reutersagency.com/feed/', 'Global News'),
-    ('Al Jazeera', 'https://www.aljazeera.com/xml/rss/all.xml', 'Global News'),
-    ('NPR News', 'https://feeds.npr.org/1001/rss.xml', 'Global News')
-on conflict (rss_url) do nothing;
-
--- ============================
--- STARTUPS & LAUNCHES
--- ============================
-insert into public.sources (name, rss_url, category) values
-    ('YCombinator Blog', 'https://www.ycombinator.com/blog/rss/', 'Startups'),
-    ('First Round Review', 'https://review.firstround.com/feed.xml', 'Startups'),
-    ('Product Hunt', 'https://www.producthunt.com/feed', 'Startups'),
-    ('Hacker News', 'https://hnrss.org/frontpage', 'Startups')
-on conflict (rss_url) do nothing;
-
--- ============================
--- AI TOOLS (NEW - Fixed)
--- ============================
-insert into public.sources (name, rss_url, category) values
-    ('Unite.AI - AI News & Tools', 'https://www.unite.ai/feed/', 'AI Tools'),
-    ('MarkTechPost - AI Tools', 'https://www.marktechpost.com/feed/', 'AI Tools'),
-    ('Google News - AI Tools', 'https://news.google.com/rss/search?q="AI+Tools"+when:7d&hl=en-US&gl=US&ceid=US:en', 'AI Tools')
-on conflict (rss_url) do nothing;
-
--- ============================
--- BUSINESS (NEW)
--- ============================
-insert into public.sources (name, rss_url, category) values
-    ('Bloomberg Business', 'https://feeds.bloomberg.com/business/news.rss', 'Business'),
-    ('CNBC Business', 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrrss01&id=10001147', 'Business'),
-    ('Forbes Business', 'https://www.forbes.com/business/feed/', 'Business'),
-    ('Financial Times - Business', 'https://www.ft.com/business-education?format=rss', 'Business')
-on conflict (rss_url) do nothing;
-
--- ============================
--- STOCKS & TRADING (NEW)
--- ============================
-insert into public.sources (name, rss_url, category) values
-    ('Yahoo Finance - Stock Market', 'https://finance.yahoo.com/news/rssindex', 'Stocks & Trading'),
-    ('MarketWatch - Top Stories', 'http://feeds.marketwatch.com/marketwatch/topstories/', 'Stocks & Trading'),
-    ('Investing.com - Stock Market', 'https://www.investing.com/rss/stock_Market_News.rss', 'Stocks & Trading'),
-    ('Seeking Alpha - Market News', 'https://seekingalpha.com/feed.xml', 'Stocks & Trading')
-on conflict (rss_url) do nothing;
-
--- ============================================================
--- DONE! ~60 RSS sources seeded across 12 categories.
--- ============================================================
+insert into public.sources (name, rss_url, category, is_active) values
+('Ars Technica','https://feeds.arstechnica.com/arstechnica/index','Technology',true),
+('The Verge','https://www.theverge.com/rss/index.xml','Technology',true),
+('TechCrunch','https://techcrunch.com/feed/','Technology',true),
+('Wired','https://www.wired.com/feed/rss','Technology',true),
+('Engadget','https://www.engadget.com/rss.xml','Technology',true),
+('Hacker News','https://hnrss.org/frontpage','Technology',true),
+('MIT Technology Review','https://www.technologyreview.com/feed/','Technology',true),
+('OpenAI Blog','https://openai.com/blog/rss.xml','AI & ML',true),
+('Google DeepMind','https://deepmind.google/blog/rss.xml','AI & ML',true),
+('Hugging Face Blog','https://huggingface.co/blog/feed.xml','AI & ML',true),
+('VentureBeat AI','https://venturebeat.com/category/ai/feed/','AI & ML',true),
+('Berkeley BAIR','https://bair.berkeley.edu/blog/feed.xml','AI & ML',true),
+('The Gradient','https://thegradient.pub/rss/','AI & ML',true),
+('The Decoder','https://the-decoder.com/feed/','AI Tools',true),
+('MarkTechPost','https://www.marktechpost.com/feed/','AI Tools',true),
+('CNBC Business','https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10001147','Business',true),
+('Forbes Business','https://www.forbes.com/business/feed/','Business',true),
+('Fortune','https://fortune.com/feed/','Business',true),
+('Business Insider','https://www.businessinsider.com/rss','Business',true),
+('Financial Times','https://www.ft.com/rss/home','Business',true),
+('AWS News','https://aws.amazon.com/blogs/aws/feed/','Cloud & Infrastructure',true),
+('Cloudflare Blog','https://blog.cloudflare.com/rss/','Cloud & Infrastructure',true),
+('Google Cloud Blog','https://cloudblog.withgoogle.com/rss/','Cloud & Infrastructure',true),
+('Kubernetes Blog','https://kubernetes.io/feed.xml','Cloud & Infrastructure',true),
+('Microsoft Azure Blog','https://azure.microsoft.com/en-us/blog/feed/','Cloud & Infrastructure',true),
+('Apple Newsroom','https://www.apple.com/newsroom/rss-feed.rss','Company News',true),
+('Microsoft Blog','https://blogs.microsoft.com/feed/','Company News',true),
+('The Keyword (Google)','https://blog.google/rss/','Company News',true),
+('Meta Newsroom','https://about.fb.com/news/feed/','Company News',true),
+('NVIDIA Blog','https://blogs.nvidia.com/feed/','Company News',true),
+('GitHub Blog','https://github.blog/feed/','Company News',true),
+('Netflix Tech Blog','https://netflixtechblog.com/feed','Developer & Engineering',true),
+('Stack Overflow Blog','https://stackoverflow.blog/feed/','Developer & Engineering',true),
+('Martin Fowler','https://martinfowler.com/feed.atom','Developer & Engineering',true),
+('Dev.to','https://dev.to/feed','Developer & Engineering',true),
+('GitHub Engineering','https://github.blog/engineering/feed/','Developer & Engineering',true),
+('BBC World','https://feeds.bbci.co.uk/news/world/rss.xml','Global News',true),
+('NPR News','https://feeds.npr.org/1001/rss.xml','Global News',true),
+('Al Jazeera','https://www.aljazeera.com/xml/rss/all.xml','Global News',true),
+('The Guardian World','https://www.theguardian.com/world/rss','Global News',true),
+('WHO News','https://www.who.int/rss-feeds/news-english.xml','Outbreaks & Health',true),
+('STAT News','https://www.statnews.com/feed/','Outbreaks & Health',true),
+('NPR Health','https://feeds.npr.org/1128/rss.xml','Outbreaks & Health',true),
+('Krebs on Security','https://krebsonsecurity.com/feed/','Security',true),
+('BleepingComputer','https://www.bleepingcomputer.com/feed/','Security',true),
+('The Hacker News','https://feeds.feedburner.com/TheHackersNews','Security',true),
+('Dark Reading','https://www.darkreading.com/rss.xml','Security',true),
+('Schneier on Security','https://www.schneier.com/feed/atom/','Security',true),
+('SecurityWeek','https://www.securityweek.com/feed/','Security',true),
+('YCombinator Blog','https://www.ycombinator.com/blog/rss','Startups',true),
+('TechCrunch Startups','https://techcrunch.com/category/startups/feed/','Startups',true),
+('Crunchbase News','https://news.crunchbase.com/feed/','Startups',true),
+('Product Hunt','https://www.producthunt.com/feed','Startups',true),
+('MarketWatch Top Stories','https://feeds.marketwatch.com/marketwatch/topstories/','Stocks & Trading',true),
+('Investing.com','https://www.investing.com/rss/news.rss','Stocks & Trading',true),
+('Yahoo Finance','https://finance.yahoo.com/news/rssindex','Stocks & Trading',true),
+('CNBC Markets','https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258','Stocks & Trading',true),
+('Seeking Alpha','https://seekingalpha.com/feed.xml','Stocks & Trading',true)
+on conflict (rss_url) do update
+  set name = excluded.name,
+      category = excluded.category,
+      is_active = excluded.is_active;

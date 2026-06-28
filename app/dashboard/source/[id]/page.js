@@ -18,10 +18,15 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function SourcePage({ params }) {
+export default async function SourcePage({ params, searchParams }) {
   const { id } = await params;
   const supabase = await createClient();
   const bookmarkedIds = await getBookmarkedArticleIds();
+
+  const limit = 20;
+  const page = Math.max(1, Number((await searchParams)?.page) || 1);
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
 
   // Get source details
   const { data: source } = await supabase
@@ -36,7 +41,8 @@ export default async function SourcePage({ params }) {
     .select('*, sources!inner(name)', { count: 'exact' })
     .eq('source_id', id)
     .order('published_at', { ascending: false })
-    .range(0, 19);
+    .order('id', { ascending: false })
+    .range(from, to);
 
   return (
     <div>
@@ -51,10 +57,10 @@ export default async function SourcePage({ params }) {
       <ArticleList
         initialArticles={articles || []}
         initialPagination={{
-          page: 1,
-          limit: 20,
+          page,
+          limit,
           total: count || 0,
-          totalPages: Math.ceil((count || 0) / 20),
+          totalPages: Math.ceil((count || 0) / limit),
         }}
         bookmarkedIds={bookmarkedIds}
         viewMode="detailed"

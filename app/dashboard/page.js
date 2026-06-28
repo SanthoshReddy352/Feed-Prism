@@ -29,7 +29,9 @@ export default async function DashboardPage({ searchParams }) {
       q = q.in('source_id', userPreferences.preferred_sources);
     }
 
-    return q.order('published_at', { ascending: false });
+    return q
+      .order('published_at', { ascending: false })
+      .order('id', { ascending: false });
   };
 
   let featuredArticles = [];
